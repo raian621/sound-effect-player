@@ -27,7 +27,7 @@ impl<K: Hash + Eq, V: Sized + Clone> LruCache<K, V> {
     }
 
     pub fn push(&mut self, key: K, value: V, byte_size: usize) -> Option<(K, V)> {
-        while byte_size + self.byte_size > self.max_byte_size && self.inner.len() > 0 {
+        while byte_size + self.byte_size > self.max_byte_size && !self.inner.is_empty() {
             self.byte_size -= match self.inner.pop_lru() {
                 Some((_, v)) => v.byte_size,
                 None => 0,

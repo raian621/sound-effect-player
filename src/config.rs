@@ -28,16 +28,15 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use super::*;
+
+    use std::io::Cursor;
 
     #[test]
     fn read_full_config_from_file() {
         let raw_yaml = concat!(
             "play_in_loop: true\n",
             "shuffle: true\n",
-            "loop_count: -1\n",
             "file_paths:\n",
             "  - /cool/path/to/audio1.mp3\n",
             "  - /cool/path/to/audio2.mp3\n",
