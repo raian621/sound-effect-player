@@ -10,11 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # rodio, the library used to play audio in this program, needs alsa to be
-      # installed at build time.
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: alsa-lib-devel
+      - name: Install alsa libs for rodio
+        run: apt-get install alsa-lib-dev
 
       - uses: actions-rs/toolchain@v1
         with:
