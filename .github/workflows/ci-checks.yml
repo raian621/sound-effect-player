@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Install alsa libs for rodio
-        run: sudo apt-get install alsa-lib-devel -y
+        run: sudo apt-get install libasound2-dev -y
 
       - uses: actions-rs/toolchain@v1
         with:
