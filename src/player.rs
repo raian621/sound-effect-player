@@ -53,7 +53,6 @@ impl Player {
     }
 
     fn play_audio_clip(&mut self, file_path: &String) {
-        println!("Playing audio clip at {file_path}");
         let source = self.load_audio_source(file_path);
         self.audio_sink.append(source);
         self.audio_sink.play();
@@ -79,7 +78,11 @@ impl Player {
             let source = Decoder::try_from(File::open(file_path).unwrap())
                 .unwrap()
                 .buffered();
-            self.audio_cache.push(file_path.clone(), source.clone());
+            let byte_size = source.channels() as usize
+                * source.sample_rate() as usize
+                * source.current_span_len().expect("should have samples") as usize;
+            self.audio_cache
+                .push(file_path.clone(), source.clone(), byte_size);
             source
         }
     }

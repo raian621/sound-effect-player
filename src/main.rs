@@ -12,14 +12,14 @@ pub mod cache;
 pub mod config;
 pub mod player;
 
-const MAX_QUEUE_BYTE_SIZE: usize = 100_000_000; // 100
+const MAX_CACHE_BYTE_SIZE: usize = 100_000_000; // 100 MB
 
 fn main() {
     let args = Args::get_args();
     let config_path = args.config_path.unwrap();
     let file = File::open(config_path).unwrap();
     let config = Config::load_config_from_file(file);
-    let audio_cache = LruCache::new(MAX_QUEUE_BYTE_SIZE);
+    let audio_cache = LruCache::new(MAX_CACHE_BYTE_SIZE);
     println!("{:?}", config.file_paths);
     let loops = if config.play_in_loop.unwrap() {
         match config.loop_count {
