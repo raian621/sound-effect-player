@@ -39,10 +39,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - build: linux
-          toolchain: nightly
-          target: x86_64-unknown-linux-musl
-          
+        - build: stable-x86
+          toolchain: stable
+          target: x86_64-unknown-linux-gn
+
         - build: stable-x86
           toolchain: stable
           target: i686-unknown-linux-gnu
@@ -55,14 +55,6 @@ jobs:
           toolchain: stable
           target: armv7-unknown-linux-gnueabihf
           
-        - build: stable-arm-musleabihf
-          toolchain: stable
-          target: armv7-unknown-linux-musleabihf
-          
-        - build: stable-arm-musleabi
-          toolchain: stable
-          target: armv7-unknown-linux-musleabi
-          
         - build: stable-powerpc64
           toolchain: stable
           target: powerpc64-unknown-linux-gnu
@@ -70,6 +62,10 @@ jobs:
         - build: stable-s390x
           toolchain: stable
           target: s390x-unknown-linux-gnu
+
+        - build: stable-riscv
+          toolchain: stable
+          target: riscv64gc-unknown-linux-gnu
   
     runs-on: ubuntu-latest
     steps:
