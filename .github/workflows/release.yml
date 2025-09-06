@@ -1,0 +1,125 @@
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Version of the release
+        required: true
+      dry_run:
+        type: boolean
+        description: Make build artifacts without creating a real release
+        default: true
+        required: false
+
+jobs:
+  verify_version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify version number pattern
+        run: echo "${{ github.event.inputs.version }}" | grep -E "\d+\.\d+\.\d+"
+
+      - name: Verify version matches version defined in Cargo.toml
+        run: |
+          grep -E "^version = ${{ github.event.inputs.version }}\$"
+  
+  create_release:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.inputs.dry_run }}
+    steps:
+      - uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: ${{ github.event.inputs.version }}
+          
+  build:
+    needs: verify_version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build: linux
+          toolchain: nightly
+          target: x86_64-unknown-linux-musl
+          
+        - build: stable-x86
+          toolchain: stable
+          target: i686-unknown-linux-gnu
+          
+        - build: stable-aarch64
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          
+        - build: stable-arm-gnueabihf
+          toolchain: stable
+          target: armv7-unknown-linux-gnueabihf
+          
+        - build: stable-arm-musleabihf
+          toolchain: stable
+          target: armv7-unknown-linux-musleabihf
+          
+        - build: stable-arm-musleabi
+          toolchain: stable
+          target: armv7-unknown-linux-musleabi
+          
+        - build: stable-powerpc64
+          toolchain: stable
+          target: powerpc64-unknown-linux-gnu
+          
+        - build: stable-s390x
+          toolchain: stable
+          target: s390x-unknown-linux-gnu
+  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install alsa libs for rodio
+        run: sudo apt-get install libasound2-dev -y
+      
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.target }}
+
+      - name: Build binary in release mode
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --verbose --release --all-features --target ${{ matrix.target }}
+
+      - name: Generate names for package, archive, and checksum
+        id: names
+        shell: bash
+        run: |
+          PROGRAM="sound-effect-player"
+          VERSION=${{ github.event.inputs.version }}
+          TOOLCHAIN=${{ matrix.toolchain }}
+          TARGET=${{ matrix.target }}
+          echo "PACKAGE_NAME=\"${PROGRAM}_${VERSION}_${TOOLCHAIN}_${TARGET}\"" >> $GITHUB_OUTPUT
+          echo "ARCHIVE_NAME=\"${PACKAGE_NAME}.tar.gz\"" >> $GITHUB_OUTPUT
+          echo "CHECKSUM_NAME=\"${ARCHIVE_NAME}.sha256\"" >> $GITHUB_OUTPUT
+
+      - name: Package binary and checksum
+        shell: bash
+        run: |
+          PACKAGE_DIR="/tmp/${PACKAGE_NAME}"
+
+          mkdir -p $PACKAGE_DIR
+          cp ./target/release/sound-effect-player $PACKAGE_DIR
+          tar -czvf $ARCHIVE_NAME $PACKAGE_DIR/
+          shasum -a 256 $ARCHIVE_NAME > $CHECKSUM_NAME
+      
+      - name: Upload archive as artifact in dry run
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.ARCHIVE_NAME }}
+          path: ./${{ steps.names.outputs.ARCHIVE_NAME }}
+
+      - name: Upload checksum as artifact in dry run
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.CHECKSUM_NAME }}
+          path: ./${{ steps.names.outputs.CHECKSUM_NAME }}
