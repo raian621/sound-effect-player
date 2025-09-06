@@ -92,6 +92,8 @@ jobs:
           use-cross: true
           command: build
           args: --verbose --release --all-features --target ${{ matrix.target }}
+        env:
+          PKG_CONFIG_PATH: ${{ github.env.PKG_CONFIG_PATH }}
 
       - name: Generate names for package, archive, and checksum
         id: names
