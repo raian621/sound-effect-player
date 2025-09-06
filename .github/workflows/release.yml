@@ -7,7 +7,7 @@ on:
         required: true
       dry_run:
         type: boolean
-        description: Make build artifacts without creating a real release
+        description: Dry run
         default: true
         required: false
 
