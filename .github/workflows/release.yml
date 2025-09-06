@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Verify version number pattern
-        run: echo "${{ github.event.inputs.version }}" | grep -E "\d+\.\d+\.\d+"
+        run: echo "${{ github.event.inputs.version }}" | grep -E "([0-9]+\.){2}[0-9]+"            
 
       - name: Verify version matches version defined in Cargo.toml
         run: |
