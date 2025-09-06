@@ -22,7 +22,7 @@ jobs:
 
       - name: Verify version matches version defined in Cargo.toml
         run: |
-          grep -E "^version = ${{ github.event.inputs.version }}\$"
+          grep -E "^version = ${{ github.event.inputs.version }}\$" Cargo.toml
   
   create_release:
     runs-on: ubuntu-latest
