@@ -75,12 +75,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install alsa libs for rodio
-        run: |
-          sudo apt-get install libasound2-dev -y
-          ALSA_PATH=$(find /usr -name alsa.pc 2>/dev/null | xargs dirname)
-          echo "PKG_CONFIG_PATH=${ALSA_PATH}" >> GITHUB_ENV 
-
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
@@ -92,8 +86,6 @@ jobs:
           use-cross: true
           command: build
           args: --verbose --release --all-features --target ${{ matrix.target }}
-        env:
-          PKG_CONFIG_PATH: ${{ github.env.PKG_CONFIG_PATH }}
 
       - name: Generate names for package, archive, and checksum
         id: names
